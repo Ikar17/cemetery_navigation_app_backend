@@ -8,18 +8,18 @@
 
  # API Endpoints
    - POST http://localhost:8080/auth/signin
-       - <p> Endpoint to authenticate existing user. You have to send a object with email and password fields. </p>
+       - Endpoint to authenticate existing user. You have to send a object with email and password fields.
          <p>For example: </p>
-         ``` javascript
+         ```json
          { 
            "email" : "john@gmail.com",
            "password" : "12345" 
          }
         ```
    - POST http://localhost:8080/auth/signup
-       - <p> Endpoint to register a new user. You have to send a object with first name, last name, email and password fields. </p>
+       - Endpoint to register a new user. You have to send a object with first name, last name, email and password fields.
          <p> For example: </p>
-         ``` javascript
+         ```json
          { 
            "firstName": "John", 
            "lastName" : "Smith", 
