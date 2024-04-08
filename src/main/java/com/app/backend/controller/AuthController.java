@@ -3,6 +3,7 @@ package com.app.backend.controller;
 import com.app.backend.dto.LoginDto;
 import com.app.backend.model.User;
 import com.app.backend.repository.UserRepository;
+import com.app.backend.service.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,15 +24,17 @@ public class AuthController {
     private AuthenticationManager authenticationManager;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private JwtService jwtService;
 
     @PostMapping("/signin")
     public ResponseEntity<String> signIn(@RequestBody LoginDto loginDto){
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+        Authentication authUser = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginDto.getEmail(),
                 loginDto.getPassword()
         ));
 
-        String jwtToken = "Token"; //todo implement generate jwt token
+        String jwtToken = jwtService.generateToken(authUser);
         return new ResponseEntity<>(jwtToken, HttpStatus.OK);
     }
 
