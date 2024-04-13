@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Entity
 @Data
-public class Cementery {
+public class Cemetery {
     @Id
     @GeneratedValue
     private Integer id;
