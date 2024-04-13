@@ -1,5 +1,6 @@
 package com.app.backend.service;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.SecretKey;
 import java.security.Key;
 import java.util.Date;
 
@@ -29,6 +31,24 @@ public class JwtService {
                 .signWith(getSignInKey())
                 .compact();
         return token;
+    }
+
+    public String extractEmail(String token){
+        try{
+            Claims claims = decodeToken(token);
+            return claims.getSubject();
+        }catch(Exception e){
+            return null;
+        }
+    }
+
+    private Claims decodeToken(String token) throws Exception {
+        return Jwts
+                .parser()
+                .verifyWith((SecretKey) getSignInKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     private Key getSignInKey() {
