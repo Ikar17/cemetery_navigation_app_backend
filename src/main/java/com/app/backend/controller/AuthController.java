@@ -4,6 +4,7 @@ import com.app.backend.dto.LoginDTO;
 import com.app.backend.model.User;
 import com.app.backend.repository.UserRepository;
 import com.app.backend.service.JwtService;
+import com.app.backend.utils.AccountType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -61,6 +62,7 @@ public class AuthController {
         try {
             String encodedPassword = passwordEncoder.encode(user.getPassword().trim());
             user.setPassword(encodedPassword);
+            user.setAccountType(AccountType.USER);
             userRepository.save(user);
         } catch (Exception e) {
             return new ResponseEntity<>("An error occurred during registration. Please try again.", HttpStatus.INTERNAL_SERVER_ERROR);

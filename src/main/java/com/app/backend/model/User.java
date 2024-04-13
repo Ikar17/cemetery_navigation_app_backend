@@ -1,5 +1,6 @@
 package com.app.backend.model;
 
+import com.app.backend.utils.AccountType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,10 +27,12 @@ public class User implements UserDetails {
     private String lastName;
     @Column(nullable = false)
     private String password;
+    @Enumerated(EnumType.STRING)
+    private AccountType accountType;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("USER"));  //temporary; todo implements user category
+        return List.of(new SimpleGrantedAuthority(accountType.name()));
     }
 
     @Override
