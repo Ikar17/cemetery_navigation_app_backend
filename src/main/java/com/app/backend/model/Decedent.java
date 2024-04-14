@@ -25,7 +25,6 @@ public class Decedent {
 
     private LocalDate birthDate;
     private LocalDate deathDate;
-
     private String description;
 
     private float latitude;
