@@ -14,7 +14,6 @@ import java.time.Period;
 @Entity
 @Table(name = "_decedent")
 public class Decedent {
-
     @Id
     @GeneratedValue
     private Integer id;
