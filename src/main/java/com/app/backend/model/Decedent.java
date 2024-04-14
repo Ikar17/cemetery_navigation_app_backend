@@ -18,11 +18,11 @@ public class Decedent {
     @Id
     @GeneratedValue
     private Integer id;
-    @Column(unique = true, nullable = false)
 
-    private String name;
-    private String surname;
     @Column(nullable = false)
+    private String name;
+    @Column(nullable = false)
+    private String surname;
 
     private LocalDate birthDate;
     private LocalDate deathDate;
