@@ -41,13 +41,13 @@ public class Decedent {
     private byte[] tombstoneImage;
 
     @ManyToOne
-    @JoinColumn(name="user_id")
+    @JoinColumn(name = "user_id")
     private User user;
 
-    public int calculateAge(){
-        if(birthDate!=null&&deathDate!=null){
-            return Period.between(birthDate,deathDate).getYears();
-        }else{
+    public int calculateAge() {
+        if (birthDate != null && deathDate != null) {
+            return Period.between(birthDate, deathDate).getYears();
+        } else {
             return 0;
         }
     }
