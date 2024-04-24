@@ -47,6 +47,26 @@ public class DecedentController {
         }
     }
 
+    @PatchMapping("/{id}")
+    public ResponseEntity<Decedent> updateDecedentById(@PathVariable Integer id,
+                                                       @RequestBody Decedent decedent) {
+        Optional<Decedent> decedentOptional = decedentRepository.findById(id);
+        if (decedentOptional.isEmpty()) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        Decedent originalDecedent = decedentOptional.get();
+        if(decedent.getBirthDate() != null) originalDecedent.setBirthDate(decedent.getBirthDate());
+        if(decedent.getDeathDate() != null) originalDecedent.setDeathDate(decedent.getDeathDate());
+        if(decedent.getName() != null) originalDecedent.setName(decedent.getName());
+        if(decedent.getSurname() != null) originalDecedent.setSurname(decedent.getSurname());
+        if(decedent.getDescription() != null) originalDecedent.setDescription(decedent.getDescription());
+        if(decedent.getLatitude() != null) originalDecedent.setLatitude(decedent.getLatitude());
+        if(decedent.getLongitude() != null) originalDecedent.setLongitude(decedent.getLongitude());
+        if(decedent.getTombstoneImage() != null) originalDecedent.setTombstoneImage(decedent.getTombstoneImage());
+
+        decedentRepository.save(originalDecedent);
+        return new ResponseEntity<>(originalDecedent, HttpStatus.OK);
+    }
+
     private ResponseEntity<String> validateDecedent(Decedent decedent){
         if (decedent == null) {
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Decedent data is null");

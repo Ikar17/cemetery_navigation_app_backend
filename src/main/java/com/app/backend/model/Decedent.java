@@ -27,8 +27,8 @@ public class Decedent {
     private LocalDate deathDate;
     private String description;
 
-    private float latitude;
-    private float longitude;
+    private Float latitude;
+    private Float longitude;
 
     @ManyToOne
     @JoinColumn(name = "cemetery_id")
