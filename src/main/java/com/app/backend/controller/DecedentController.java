@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/decedent")
@@ -29,6 +30,20 @@ public class DecedentController {
             return new ResponseEntity<>("Decedent added successfully", HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>("Error saving decedent: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Decedent> getDecedentById(@PathVariable Integer id) {
+        try {
+            Optional<Decedent> decedentOptional = decedentRepository.findById(id);
+            if (decedentOptional.isPresent()) {
+                return new ResponseEntity<>(decedentOptional.get(), HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
