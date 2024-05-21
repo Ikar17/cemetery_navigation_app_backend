@@ -1,5 +1,6 @@
 package com.app.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,8 +28,8 @@ public class Decedent {
     private LocalDate deathDate;
     private String description;
 
-    private float latitude;
-    private float longitude;
+    private Float latitude;
+    private Float longitude;
 
     @ManyToOne
     @JoinColumn(name = "cemetery_id")
@@ -40,6 +41,7 @@ public class Decedent {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private User user;
 
     public int calculateAge() {
