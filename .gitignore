@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### GCP Key ###
+/src/main/resources/gcp_key.json
