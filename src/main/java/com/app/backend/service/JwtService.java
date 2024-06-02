@@ -6,6 +6,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -19,36 +20,33 @@ public class JwtService {
     @Value("${application.security.jwt.expiration}")
     private long jwtExpiration;
 
-    public String generateToken(Authentication user){
+    public String generateToken(Authentication authentication) {
         Date tokenCreateDate = new Date();
         Date tokenExpirationDate = new Date(tokenCreateDate.getTime() + jwtExpiration);
 
-        String token = Jwts.builder()
-                .claims()
-                .subject(user.getName())
-                .expiration(tokenExpirationDate)
-                .and()
-                .signWith(getSignInKey())
-                .compact();
-        return token;
+        return Jwts.builder().setSubject(authentication.getName()).setIssuedAt(tokenCreateDate).setExpiration(tokenExpirationDate).signWith(getSignInKey()).compact();
     }
 
-    public String extractEmail(String token){
-        try{
+    public String extractEmail(String token) {
+        try {
             Claims claims = decodeToken(token);
             return claims.getSubject();
-        }catch(Exception e){
+        } catch (Exception e) {
             return null;
         }
     }
 
+    public boolean isTokenValid(String token, UserDetails userDetails) throws Exception {
+        final String username = extractEmail(token);
+        return (username != null && username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
+
     private Claims decodeToken(String token) throws Exception {
-        return Jwts
-                .parser()
-                .verifyWith((SecretKey) getSignInKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+        return Jwts.parser().verifyWith((SecretKey) getSignInKey()).build().parseSignedClaims(token).getPayload();
+    }
+
+    private boolean isTokenExpired(String token) throws Exception {
+        return decodeToken(token).getExpiration().before(new Date());
     }
 
     private Key getSignInKey() {
