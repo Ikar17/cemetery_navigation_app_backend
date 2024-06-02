@@ -3,6 +3,7 @@ package com.app.backend.controller;
 import com.app.backend.dto.LoginDTO;
 import com.app.backend.model.User;
 import com.app.backend.repository.UserRepository;
+import com.app.backend.service.EmailService;
 import com.app.backend.service.JwtService;
 import com.app.backend.utils.AccountType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +13,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
@@ -28,6 +32,8 @@ public class AuthController {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private JwtService jwtService;
+    @Autowired
+    private EmailService emailService;
 
     @PostMapping("/signin")
     public ResponseEntity<String> signIn(@RequestBody LoginDTO loginDto) {
@@ -64,6 +70,11 @@ public class AuthController {
             user.setPassword(encodedPassword);
             user.setAccountType(AccountType.USER);
             userRepository.save(user);
+
+            String subject = "Registration Confirmation";
+            String text = "Dear " + user.getUsername() + ",\n\nThank you for registering. Your registration was successful.\n\nBest Regards,\nSpokoj Ducha";
+            emailService.sendRegistrationEmail(user.getEmail(), subject, text);
+
         } catch (Exception e) {
             return new ResponseEntity<>("An error occurred during registration. Please try again.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -71,4 +82,19 @@ public class AuthController {
         return new ResponseEntity<>("User registered successfully", HttpStatus.CREATED);
     }
 
+    @GetMapping("/user-id")
+    public ResponseEntity<Integer> getUserId() {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String userEmail = authentication.getName();
+            Optional<User> userOptional = userRepository.findByEmail(userEmail);
+            if (userOptional.isPresent()) {
+                return ResponseEntity.ok(userOptional.get().getId());
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 }
