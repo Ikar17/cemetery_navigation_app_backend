@@ -1,4 +1,4 @@
-package com.app.backend.utils;
+package com.app.backend.utilsTest;
 
 public enum AccountType {
     USER, ADMIN

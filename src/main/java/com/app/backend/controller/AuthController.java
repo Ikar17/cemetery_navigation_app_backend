@@ -5,7 +5,7 @@ import com.app.backend.model.User;
 import com.app.backend.repository.UserRepository;
 import com.app.backend.service.EmailService;
 import com.app.backend.service.JwtService;
-import com.app.backend.utils.AccountType;
+import com.app.backend.utilsTest.AccountType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
