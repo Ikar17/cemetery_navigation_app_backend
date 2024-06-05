@@ -1,0 +1,7 @@
+spring:
+  cloud:
+    gcp:
+      storage:
+        credentials:
+          location: classpath:gcp_key.json
+      project-id: valid-cell-424514-j2

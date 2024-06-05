@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: backend
+  datasource:
+    url: jdbc:postgresql://localhost:5432/navigation_app
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+  mail:
+    host: smtp.office365.com
+    port: 587
+    username: spokojducha@outlook.com
+    password: Duch12345
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+application:
+  security:
+    jwt:
+      secret_key: fb4b0ea65b693d09af394afe018d9872001fbd61f19f1e568117a6c2907a3cd9
+      expiration: 86400000
+
+server:
+  port: 8082
