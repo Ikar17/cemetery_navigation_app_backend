@@ -1,6 +1,6 @@
 package com.app.backend.model;
 
-import com.app.backend.utils.AccountType;
+import com.app.backend.utilsTest.AccountType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
