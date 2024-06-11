@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface DecedentRepository extends JpaRepository<Decedent, Integer> {
     List<Decedent> findBySurname(String surname);
-
+    List<Decedent> findByNameContainingIgnoreCaseAndSurnameContainingIgnoreCase(String name, String surname);
 }

@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/decedent")
@@ -151,5 +153,33 @@ public class DecedentController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Decedent>> getDecedentsByKeywords(@RequestBody DecedentDTO decedentDTO){
+        try{
+            String name = "";
+            String surname = "";
+            if(decedentDTO.getSurname() != null) surname = decedentDTO.getSurname();
+            if(decedentDTO.getName() != null) name = decedentDTO.getName();
+            if(name.length() < 2 && surname.length() < 2){
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+
+            List<Decedent> decedents = decedentRepository.findByNameContainingIgnoreCaseAndSurnameContainingIgnoreCase(name, surname);
+
+            if(decedentDTO.getCemeteryId() != null){
+                Integer cemeteryId = decedentDTO.getCemeteryId();
+                List<Decedent> filteredDecedents = decedents.stream()
+                        .filter(decedent -> decedent.getCemetery() != null && cemeteryId.equals(decedent.getCemetery().getId()))
+                        .toList();
+                return new ResponseEntity<>(filteredDecedents, HttpStatus.OK);
+            }
+
+            return new ResponseEntity<>(decedents, HttpStatus.OK);
+        }catch(Exception e){
+            System.out.println(e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
