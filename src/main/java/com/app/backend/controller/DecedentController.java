@@ -69,8 +69,8 @@ public class DecedentController {
             decedent.setBirthDate(decedentDTO.getBirthDate());
             decedent.setDeathDate(decedentDTO.getDeathDate());
             decedent.setDescription(decedentDTO.getDescription());
-            decedent.setLatitude(decedentDTO.getLatitude());
-            decedent.setLongitude(decedentDTO.getLongitude());
+            decedent.setLatitude(Float.valueOf(0));
+            decedent.setLongitude(Float.valueOf(0));
 
             Optional<Cemetery> cemeteryOptional = cemeteryRepository.findById(decedentDTO.getCemeteryId());
             if (cemeteryOptional.isPresent()) {
@@ -170,12 +170,20 @@ public class DecedentController {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
 
-            List<Decedent> decedents = decedentRepository.findByNameContainingIgnoreCaseAndSurnameContainingIgnoreCase(name, surname);
+            List<Decedent> decedents = decedentRepository.findByNameStartingWithIgnoreCaseAndSurnameStartingWithIgnoreCase(name, surname);
 
             if (decedentDTO.getCemeteryId() != null) {
                 Integer cemeteryId = decedentDTO.getCemeteryId();
                 List<Decedent> filteredDecedents = decedents.stream()
                         .filter(decedent -> decedent.getCemetery() != null && cemeteryId.equals(decedent.getCemetery().getId()))
+                        .collect(Collectors.toList());
+                return new ResponseEntity<>(filteredDecedents, HttpStatus.OK);
+            }
+
+            if(decedentDTO.getCity() != null){
+                String city = decedentDTO.getCity();
+                List<Decedent> filteredDecedents = decedents.stream()
+                        .filter(decedent -> decedent.getCemetery() != null && city.equals(decedent.getCemetery().getCity()))
                         .collect(Collectors.toList());
                 return new ResponseEntity<>(filteredDecedents, HttpStatus.OK);
             }

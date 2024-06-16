@@ -41,6 +41,7 @@ public class SecurityConfiguration {
                         .requestMatchers(AUTH_WHITELIST).permitAll()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/decedent/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/cemetery/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

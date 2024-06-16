@@ -22,17 +22,52 @@ public class CemeteryController {
 
     @PostMapping
     public ResponseEntity<String> addNewCemetery(@RequestBody Cemetery cemetery) {
-        if (cemetery.getName() == null || cemetery.getAddress() == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
-        }
-        boolean isNameAllowed = moderationService.checkTextContent(cemetery.getName());
-        boolean isAddressAllowed = moderationService.checkTextContent(cemetery.getAddress());
+        try{
+            if (cemetery.getName() == null || cemetery.getAddress() == null) {
+                return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+            }
 
-        if (!isNameAllowed || !isAddressAllowed) {
-            return new ResponseEntity<>("Content contains offensive language.", HttpStatus.BAD_REQUEST);
+            //trzeba uruchomić aplikacje do sprawdzania w Pythonie i odkomentować
+
+//            boolean isNameAllowed = moderationService.checkTextContent(cemetery.getName());
+//            boolean isAddressAllowed = moderationService.checkTextContent(cemetery.getAddress());
+//
+//            if (!isNameAllowed || !isAddressAllowed) {
+//                return new ResponseEntity<>("Content contains offensive language.", HttpStatus.BAD_REQUEST);
+//            }
+
+            //rozdzielam adres na ulice oraz miasto
+            String address = cemetery.getAddress();
+            int commaIndex = address.indexOf(',');
+            int dotIndex = address.indexOf('.');
+
+            int splitIndex;
+            if (commaIndex != -1) {
+                splitIndex = commaIndex;
+            } else {
+                splitIndex = dotIndex;
+            }
+
+            if(splitIndex != -1){
+                String streetPart = address.substring(0, splitIndex).trim();
+                String cityPart = address.substring(splitIndex + 1).trim();
+                cemetery.setAddress(streetPart);
+                cemetery.setCity(cityPart);
+            }
+
+            //sprawdzam czy juz taki cmentarz istnieje
+            Optional<Cemetery> existingCemetery = cemeteryRepository.findByAddressContainingAndCityContaining(cemetery.getAddress(), cemetery.getCity());
+            if(existingCemetery.isPresent()){
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+
+            cemeteryRepository.save(cemetery);
+            return new ResponseEntity<>(HttpStatus.CREATED);
+        }catch(Exception e){
+            System.out.println(e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        cemeteryRepository.save(cemetery);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+
     }
 
     @GetMapping
@@ -48,6 +83,16 @@ public class CemeteryController {
             return new ResponseEntity<>(cemetery.get(), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Cemetery>> findByCity(@RequestParam String city){
+        try{
+            List<Cemetery> cemeteries = cemeteryRepository.findByCity(city);
+            return new ResponseEntity<>(cemeteries, HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

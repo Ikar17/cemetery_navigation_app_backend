@@ -147,7 +147,7 @@ public class DecedentControllerTests {
     public void testGetDecedentsByKeywordsHappyPath() throws Exception {
         List<Decedent> decedents = List.of(testDecedent);
 
-        Mockito.when(decedentRepository.findByNameContainingIgnoreCaseAndSurnameContainingIgnoreCase(
+        Mockito.when(decedentRepository.findByNameStartingWithIgnoreCaseAndSurnameStartingWithIgnoreCase(
                         Mockito.eq(testDecedent.getName()),
                         Mockito.eq(testDecedent.getSurname())))
                 .thenReturn(decedents);

@@ -19,4 +19,5 @@ public class DecedentDTO {
     private Float longitude;
     private Integer cemeteryId;
     private Integer userId;
+    private String city;
 }
