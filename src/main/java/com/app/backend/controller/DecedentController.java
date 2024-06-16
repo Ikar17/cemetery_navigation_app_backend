@@ -8,6 +8,8 @@ import com.app.backend.repository.CemeteryRepository;
 import com.app.backend.repository.DecedentRepository;
 import com.app.backend.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,11 +27,15 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/decedent")
 @CrossOrigin("*")
 public class DecedentController {
+
+    private static final Logger logger = LoggerFactory.getLogger(DecedentController.class);
+
     @Autowired
     private CemeteryRepository cemeteryRepository;
 
     @Autowired
     private DecedentRepository decedentRepository;
+
     @Autowired
     private UserRepository userRepository;
 
@@ -38,21 +44,21 @@ public class DecedentController {
 
     @PostMapping("/add")
     public ResponseEntity<String> addDecedent(@RequestParam("decedent") String decedentJson, @RequestParam(value = "tombstoneImage", required = false) MultipartFile tombstoneImage) {
-        System.out.println("Received request to add decedent");
-        System.out.println("Decedent JSON: " + decedentJson);
+        logger.info("Received request to add decedent");
+        logger.info("Decedent JSON: {}", decedentJson);
 
         DecedentDTO decedentDTO;
         try {
             decedentDTO = objectMapper.readValue(decedentJson, DecedentDTO.class);
-            System.out.println("Parsed decedent DTO: " + decedentDTO);
+            logger.info("Parsed decedent DTO: {}", decedentDTO);
         } catch (Exception e) {
-            System.out.println("Error parsing decedent JSON: " + e.getMessage());
+            logger.error("Error parsing decedent JSON: {}", e.getMessage(), e);
             return new ResponseEntity<>("Invalid decedent data", HttpStatus.BAD_REQUEST);
         }
 
         ResponseEntity<String> validationResponse = validateDecedent(decedentDTO);
         if (validationResponse != null) {
-            System.out.println("Validation failed: " + validationResponse.getBody());
+            logger.warn("Validation failed: {}", validationResponse.getBody());
             return validationResponse;
         }
 
@@ -79,16 +85,16 @@ public class DecedentController {
 
             if (tombstoneImage != null && !tombstoneImage.isEmpty()) {
                 decedent.setTombstoneImage(tombstoneImage.getBytes());
-                System.out.println("Tombstone image uploaded: " + tombstoneImage.getOriginalFilename());
+                logger.info("Tombstone image uploaded: {}", tombstoneImage.getOriginalFilename());
             } else {
-                System.out.println("No tombstone image uploaded");
+                logger.info("No tombstone image uploaded");
             }
 
             decedentRepository.save(decedent);
-            System.out.println("Decedent saved successfully");
+            logger.info("Decedent saved successfully");
             return new ResponseEntity<>("Decedent added successfully", HttpStatus.CREATED);
         } catch (Exception e) {
-            System.out.println("Error saving decedent: " + e.getMessage());
+            logger.error("Error saving decedent: {}", e.getMessage(), e);
             return new ResponseEntity<>("Error saving decedent: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -101,9 +107,6 @@ public class DecedentController {
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Birth date cannot be in the future");
         }
         if (decedentDTO.getDeathDate() != null) {
-            if (decedentDTO.getDeathDate().isAfter(LocalDate.now())) {
-                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Death date cannot be in the future");
-            }
             if (decedentDTO.getBirthDate() != null && decedentDTO.getBirthDate().isAfter(decedentDTO.getDeathDate())) {
                 return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Death date cannot be after birth date");
             }
@@ -121,6 +124,7 @@ public class DecedentController {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
         } catch (Exception e) {
+            logger.error("Error fetching decedent by ID: {}", e.getMessage(), e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -150,36 +154,37 @@ public class DecedentController {
             decedentRepository.save(originalDecedent);
             return new ResponseEntity<>(originalDecedent, HttpStatus.OK);
         } catch (Exception e) {
+            logger.error("Error updating decedent: {}", e.getMessage(), e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Decedent>> getDecedentsByKeywords(@RequestBody DecedentDTO decedentDTO){
-        try{
+    public ResponseEntity<List<Decedent>> getDecedentsByKeywords(@RequestBody DecedentDTO decedentDTO) {
+        try {
             String name = "";
             String surname = "";
-            if(decedentDTO.getSurname() != null) surname = decedentDTO.getSurname();
-            if(decedentDTO.getName() != null) name = decedentDTO.getName();
-            if(name.length() < 2 && surname.length() < 2){
+            if (decedentDTO.getSurname() != null) surname = decedentDTO.getSurname();
+            if (decedentDTO.getName() != null) name = decedentDTO.getName();
+            if (name.length() < 2 && surname.length() < 2) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
 
             List<Decedent> decedents = decedentRepository.findByNameContainingIgnoreCaseAndSurnameContainingIgnoreCase(name, surname);
 
-            if(decedentDTO.getCemeteryId() != null){
+            if (decedentDTO.getCemeteryId() != null) {
                 Integer cemeteryId = decedentDTO.getCemeteryId();
                 List<Decedent> filteredDecedents = decedents.stream()
                         .filter(decedent -> decedent.getCemetery() != null && cemeteryId.equals(decedent.getCemetery().getId()))
-                        .toList();
+                        .collect(Collectors.toList());
                 return new ResponseEntity<>(filteredDecedents, HttpStatus.OK);
             }
 
             return new ResponseEntity<>(decedents, HttpStatus.OK);
-        }catch(Exception e){
-            System.out.println(e.getMessage());
+        } catch (Exception e) {
+            logger.error("Error searching decedents: {}", e.getMessage(), e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 }
