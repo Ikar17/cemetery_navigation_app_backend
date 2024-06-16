@@ -2,6 +2,7 @@ package com.app.backend.controller;
 
 import com.app.backend.model.Cemetery;
 import com.app.backend.repository.CemeteryRepository;
+import com.app.backend.service.ModerationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,11 +17,19 @@ import java.util.Optional;
 public class CemeteryController {
     @Autowired
     private CemeteryRepository cemeteryRepository;
+    @Autowired
+    private ModerationService moderationService;
 
     @PostMapping
     public ResponseEntity<String> addNewCemetery(@RequestBody Cemetery cemetery) {
         if (cemetery.getName() == null || cemetery.getAddress() == null) {
             return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+        }
+        boolean isNameAllowed = moderationService.checkTextContent(cemetery.getName());
+        boolean isAddressAllowed = moderationService.checkTextContent(cemetery.getAddress());
+
+        if (!isNameAllowed || !isAddressAllowed) {
+            return new ResponseEntity<>("Content contains offensive language.", HttpStatus.BAD_REQUEST);
         }
         cemeteryRepository.save(cemetery);
         return new ResponseEntity<>(HttpStatus.CREATED);
