@@ -7,6 +7,7 @@ import com.app.backend.model.User;
 import com.app.backend.repository.CemeteryRepository;
 import com.app.backend.repository.DecedentRepository;
 import com.app.backend.repository.UserRepository;
+import com.app.backend.service.DecedentService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +22,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/decedent")
@@ -41,6 +41,8 @@ public class DecedentController {
 
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private DecedentService decedentService;
 
     @PostMapping("/add")
     public ResponseEntity<String> addDecedent(@RequestParam("decedent") String decedentJson, @RequestParam(value = "tombstoneImage", required = false) MultipartFile tombstoneImage) {
@@ -160,38 +162,30 @@ public class DecedentController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Decedent>> getDecedentsByKeywords(@RequestBody DecedentDTO decedentDTO) {
+    public ResponseEntity<List<DecedentDTO>> searchDecedents(
+            @RequestParam String name,
+            @RequestParam String surname,
+            @RequestParam(required = false) String city) {
         try {
-            String name = "";
-            String surname = "";
-            if (decedentDTO.getSurname() != null) surname = decedentDTO.getSurname();
-            if (decedentDTO.getName() != null) name = decedentDTO.getName();
+            System.out.println("Started search operation");
+            name = name != null ? name : "";
+            surname = surname != null ? surname : "";
+            city = city != null ? city : "";
+
             if (name.length() < 2 && surname.length() < 2) {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                return ResponseEntity.notFound().build();
             }
 
-            List<Decedent> decedents = decedentRepository.findByNameStartingWithIgnoreCaseAndSurnameStartingWithIgnoreCase(name, surname);
+            List<DecedentDTO> decedents = decedentService.findByNameAndSurnameAndCity(name, surname, city);
 
-            if (decedentDTO.getCemeteryId() != null) {
-                Integer cemeteryId = decedentDTO.getCemeteryId();
-                List<Decedent> filteredDecedents = decedents.stream()
-                        .filter(decedent -> decedent.getCemetery() != null && cemeteryId.equals(decedent.getCemetery().getId()))
-                        .collect(Collectors.toList());
-                return new ResponseEntity<>(filteredDecedents, HttpStatus.OK);
+            if (decedents.isEmpty()) {
+                return ResponseEntity.notFound().build();
             }
 
-            if(decedentDTO.getCity() != null){
-                String city = decedentDTO.getCity();
-                List<Decedent> filteredDecedents = decedents.stream()
-                        .filter(decedent -> decedent.getCemetery() != null && city.equals(decedent.getCemetery().getCity()))
-                        .collect(Collectors.toList());
-                return new ResponseEntity<>(filteredDecedents, HttpStatus.OK);
-            }
-
-            return new ResponseEntity<>(decedents, HttpStatus.OK);
+            return ResponseEntity.ok(decedents);
         } catch (Exception e) {
-            logger.error("Error searching decedents: {}", e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            e.printStackTrace();
+            return ResponseEntity.status(500).build();
         }
     }
 
