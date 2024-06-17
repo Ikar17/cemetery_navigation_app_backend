@@ -10,6 +10,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DecedentDTO {
+    private Integer id;
     private String name;
     private String surname;
     private LocalDate birthDate;
@@ -20,4 +21,5 @@ public class DecedentDTO {
     private Integer cemeteryId;
     private Integer userId;
     private String city;
+    private String imageBase64;
 }

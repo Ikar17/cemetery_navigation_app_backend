@@ -36,6 +36,7 @@ public class Decedent {
     private Cemetery cemetery;
 
     @Lob
+    @Basic(fetch = FetchType.EAGER)
     @Column(name = "tombstone_image")
     private byte[] tombstoneImage;
 
