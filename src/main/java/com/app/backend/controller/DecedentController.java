@@ -68,9 +68,17 @@ public class DecedentController {
             Decedent decedent = new Decedent();
             decedent.setName(decedentDTO.getName());
             decedent.setSurname(decedentDTO.getSurname());
-            decedent.setBirthDate(decedentDTO.getBirthDate());
-            decedent.setDeathDate(decedentDTO.getDeathDate());
-            decedent.setDescription(decedentDTO.getDescription());
+
+            if(decedentDTO.getBirthDate() != null){
+                decedent.setBirthDate(decedentDTO.getBirthDate());
+            }
+            if(decedentDTO.getDeathDate() != null){
+                decedent.setDeathDate(decedentDTO.getDeathDate());
+            }
+            if(decedentDTO.getDescription() != null){
+                decedent.setDescription(decedentDTO.getDescription());
+            }
+
             decedent.setLatitude(Float.valueOf(0));
             decedent.setLongitude(Float.valueOf(0));
 
