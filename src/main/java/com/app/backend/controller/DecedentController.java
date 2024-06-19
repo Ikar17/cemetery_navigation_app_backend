@@ -8,6 +8,7 @@ import com.app.backend.repository.CemeteryRepository;
 import com.app.backend.repository.DecedentRepository;
 import com.app.backend.repository.UserRepository;
 import com.app.backend.service.DecedentService;
+import com.app.backend.service.ModerationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +44,9 @@ public class DecedentController {
     private ObjectMapper objectMapper;
     @Autowired
     private DecedentService decedentService;
+    @Autowired
+    private ModerationService moderationService;
+
 
     @PostMapping("/add")
     public ResponseEntity<String> addDecedent(@RequestParam("decedent") String decedentJson, @RequestParam(value = "tombstoneImage", required = false) MultipartFile tombstoneImage) {
@@ -65,6 +69,19 @@ public class DecedentController {
         }
 
         try {
+            boolean isNameAllowed = moderationService.checkTextContent(decedentDTO.getName());
+            boolean isDescriptionAllowed = moderationService.checkTextContent(decedentDTO.getDescription());
+
+            if (!isNameAllowed || !isDescriptionAllowed) {
+                return new ResponseEntity<>("Text contains offensive content.", HttpStatus.BAD_REQUEST);
+            }
+
+            if (tombstoneImage != null && !tombstoneImage.isEmpty()) {
+                boolean isImageSafe = moderationService.checkImageContent(tombstoneImage);
+                if (!isImageSafe) {
+                    return new ResponseEntity<>("The uploaded image is not safe.", HttpStatus.BAD_REQUEST);
+                }
+            }
             Decedent decedent = new Decedent();
             decedent.setName(decedentDTO.getName());
             decedent.setSurname(decedentDTO.getSurname());
