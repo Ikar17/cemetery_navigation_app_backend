@@ -29,12 +29,12 @@ public class CemeteryController {
 
             //trzeba uruchomić aplikacje do sprawdzania w Pythonie i odkomentować
 
-//            boolean isNameAllowed = moderationService.checkTextContent(cemetery.getName());
-//            boolean isAddressAllowed = moderationService.checkTextContent(cemetery.getAddress());
-//
-//            if (!isNameAllowed || !isAddressAllowed) {
-//                return new ResponseEntity<>("Content contains offensive language.", HttpStatus.BAD_REQUEST);
-//            }
+            boolean isNameAllowed = moderationService.checkTextContent(cemetery.getName());
+            boolean isAddressAllowed = moderationService.checkTextContent(cemetery.getAddress());
+
+            if (!isNameAllowed || !isAddressAllowed) {
+                return new ResponseEntity<>("Content contains offensive language.", HttpStatus.BAD_REQUEST);
+            }
 
             //rozdzielam adres na ulice oraz miasto
             String address = cemetery.getAddress();
